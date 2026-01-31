@@ -7,7 +7,7 @@ app = Flask(__name__, static_folder='.')
 CORS(app)
 
 # Get API key from environment variable (for security in production)
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyBnBeq-SU03tBwFM_hPDWPNiFHa_uVwURo')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 genai.configure(api_key=GEMINI_API_KEY)
 
 @app.route('/')
