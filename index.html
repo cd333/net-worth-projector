@@ -4,161 +4,380 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Net Worth Projector</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 900px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+
+        :root {
+            --green-dark: #1a3a2a;
+            --green-mid: #2d6a4f;
+            --green-light: #52b788;
+            --green-pale: #d8f3dc;
+            --accent: #e9c46a;
+            --text-primary: #1a3a2a;
+            --text-secondary: #5a7a6a;
+            --bg: #f0f7f4;
+            --card-bg: #ffffff;
+            --border: #c8e6d8;
         }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
+
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: var(--bg);
+            color: var(--text-primary);
         }
-        button:hover {
-            background-color: #45a049;
+
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
         }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4em;
+            color: var(--green-dark);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
-        #results {
-            margin-top: 30px;
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1em;
+            max-width: 550px;
+            margin: 0 auto;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+
+        .card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 2px 20px rgba(26, 58, 42, 0.07);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
         }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+
+        .card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3em;
+            color: var(--green-dark);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--green-pale);
         }
-        th {
-            background-color: #4CAF50;
-            color: white;
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
-        .monte-carlo-summary {
-            background-color: #e3f2fd;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
         }
+
+        .input-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--green-light);
+            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.15);
+        }
+
+        .input-hint {
+            font-size: 0.78em;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
         .event-input {
             display: flex;
             gap: 10px;
-            margin-bottom: 10px;
         }
+
         .event-input input {
             flex: 1;
         }
+
+        .btn {
+            background: var(--green-mid);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: var(--green-dark);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: var(--green-mid);
+            color: white;
+            padding: 14px 40px;
+            font-size: 16px;
+            border-radius: 10px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .btn-primary:hover {
+            background: var(--green-dark);
+        }
+
+        .btn-remove {
+            background: transparent;
+            color: #c0392b;
+            padding: 2px 8px;
+            font-size: 12px;
+            border: 1px solid #c0392b;
+            border-radius: 4px;
+        }
+
+        .btn-remove:hover {
+            background: #fadbd8;
+        }
+
         .event-list {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
+
         .event-item {
-            padding: 5px;
-            margin: 5px 0;
-            background: white;
-            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 12px;
+            background: var(--green-pale);
+            border-radius: 8px;
+            font-size: 0.88em;
+            color: var(--green-dark);
         }
-        small {
-            color: #666;
-            font-size: 13px;
+
+        /* Results */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .summary-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .summary-box .label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .summary-box .value {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--green-dark);
+        }
+
+        .summary-box.highlight {
+            border-color: var(--accent);
+            background: #fdf8ec;
+        }
+
+        .summary-box.highlight .value {
+            color: #b8860b;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            margin-bottom: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88em;
+        }
+
+        th {
+            background: var(--green-dark);
+            color: white;
+            padding: 10px 12px;
+            text-align: right;
+            font-weight: 500;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        th:first-child {
+            text-align: left;
+            border-radius: 8px 0 0 0;
+        }
+
+        th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        td {
+            padding: 9px 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: var(--green-mid);
+        }
+
+        tr:nth-child(even) {
+            background: var(--green-pale);
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(216, 243, 220, 0.4);
+        }
+
+        .info-box {
+            background: #fef9e7;
+            border: 1px solid #f0d78c;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 24px;
+            font-size: 0.88em;
+            color: #7d6608;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 1.05em;
+        }
+
+        .info-box ul {
+            padding-left: 18px;
+            line-height: 1.7;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <div class="hero">
         <h1>💰 Net Worth Projector</h1>
-        <p style="color: #666; margin-bottom: 30px;">Uses Monte Carlo simulation (1,000 runs) to show the range of possible outcomes</p>
-        
-        <div class="input-group">
-            <label>Current Net Worth ($)</label>
-            <input type="number" id="netWorth" placeholder="100000">
-        </div>
-        
-        <div class="input-group">
-            <label>Annual Savings ($)</label>
-            <input type="number" id="annualSavings" placeholder="20000">
-        </div>
-        
-        <div class="input-group">
-            <label>Expected Annual Return Rate (decimal, e.g., 0.07 for 7%)</label>
-            <input type="number" step="0.01" id="returnRate" placeholder="0.07">
-        </div>
-        
-        <div class="input-group">
-            <label>Investment Volatility</label>
-            <select id="volatility">
-                <option value="0.05">Low (Bonds, Stable Investments) - 5%</option>
-                <option value="0.15" selected>Medium (Diversified Stock Portfolio) - 15%</option>
-                <option value="0.25">High (Individual Stocks, Aggressive Portfolio) - 25%</option>
-            </select>
-            <small>Volatility represents how much returns can vary year-to-year</small>
-        </div>
-        
-        <div class="input-group">
-            <label>Number of Years to Project</label>
-            <input type="number" id="years" placeholder="10">
-        </div>
-        
-        <div class="input-group">
-            <label>Add Life Events (Natural Language)</label>
-            <div class="event-input">
-                <input type="text" id="eventInput" placeholder="e.g., 'Buying a $80k car in year 3'">
-                <button onclick="addEvent()" id="addEventBtn">Add Event</button>
-            </div>
-            <div id="eventList" class="event-list" style="display: none;"></div>
-        </div>
-        
-        <button onclick="calculate()" id="calculateBtn">Calculate Projection</button>
-        
-        <div id="results"></div>
+        <p>Monte Carlo simulation (1,000 runs) to model the realistic range of your financial future</p>
     </div>
+
+    <!-- Inputs -->
+    <div class="card">
+        <h2>Your Financial Snapshot</h2>
+        <div class="input-grid">
+            <div class="input-group">
+                <label>Current Net Worth ($)</label>
+                <input type="number" id="netWorth" placeholder="100000">
+            </div>
+            <div class="input-group">
+                <label>Annual Savings ($)</label>
+                <input type="number" id="annualSavings" placeholder="20000">
+            </div>
+            <div class="input-group">
+                <label>Expected Annual Return</label>
+                <input type="number" step="0.01" id="returnRate" placeholder="0.07">
+                <span class="input-hint">e.g., 0.07 for 7%</span>
+            </div>
+            <div class="input-group">
+                <label>Investment Volatility</label>
+                <select id="volatility">
+                    <option value="0.05">Low — Bonds / Stable</option>
+                    <option value="0.15" selected>Medium — Diversified Portfolio</option>
+                    <option value="0.25">High — Aggressive / Individual Stocks</option>
+                </select>
+            </div>
+            <div class="input-group full-width">
+                <label>Years to Project</label>
+                <input type="number" id="years" placeholder="10">
+            </div>
+        </div>
+    </div>
+
+    <!-- Life Events -->
+    <div class="card">
+        <h2>Life Events</h2>
+        <div class="event-input">
+            <input type="text" id="eventInput" placeholder="e.g., 'Buying a $80k car in year 3'">
+            <button class="btn" onclick="addEvent()" id="addEventBtn">Add Event</button>
+        </div>
+        <div id="eventList" class="event-list"></div>
+    </div>
+
+    <!-- Calculate Button -->
+    <button class="btn btn-primary" onclick="calculate()" id="calculateBtn">Calculate Projection</button>
+
+    <!-- Results -->
+    <div id="results"></div>
 
     <script>
         const INFLATION_RATE = 0.031;
         let lifeEvents = {};
 
-        // Box-Muller transform for generating normally distributed random numbers
         function randomNormal(mean, stdDev) {
             let u1 = Math.random();
             let u2 = Math.random();
@@ -170,110 +389,97 @@
             const eventInput = document.getElementById('eventInput');
             const eventText = eventInput.value.trim();
             const addEventBtn = document.getElementById('addEventBtn');
-            
+
             if (!eventText) return;
-            
-            // Disable button while processing
+
             addEventBtn.disabled = true;
             addEventBtn.textContent = 'Processing...';
-            
+
             try {
-                // Call your backend server instead of Gemini directly
                 const response = await fetch('/parse-event', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        eventText: eventText
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eventText: eventText })
                 });
-                
+
                 const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
+                if (data.error) throw new Error(data.error);
+
                 const eventData = JSON.parse(data.result);
-                
+
                 lifeEvents[eventData.year] = {
                     amount: eventData.amount,
                     description: eventData.description
                 };
-                
+
                 updateEventList();
                 eventInput.value = '';
-                
+
             } catch (error) {
                 alert('Could not parse event. Try being more specific about year and amount.');
                 console.error(error);
             } finally {
-                // Re-enable button
                 addEventBtn.disabled = false;
                 addEventBtn.textContent = 'Add Event';
             }
         }
-        
+
         function updateEventList() {
             const eventList = document.getElementById('eventList');
-            
+
             if (Object.keys(lifeEvents).length === 0) {
-                eventList.style.display = 'none';
+                eventList.innerHTML = '';
                 return;
             }
-            
-            eventList.style.display = 'block';
-            eventList.innerHTML = '<strong>Added Events:</strong><br>';
-            
+
+            eventList.innerHTML = '';
             for (const [year, event] of Object.entries(lifeEvents)) {
-                eventList.innerHTML += `
-                    <div class="event-item">
-                        Year ${year}: $${event.amount.toLocaleString()} (${event.description})
-                        <button onclick="removeEvent(${year})" style="float: right; padding: 2px 8px; font-size: 12px;">Remove</button>
-                    </div>
+                const item = document.createElement('div');
+                item.className = 'event-item';
+                const amountStr = event.amount >= 0
+                    ? `+$${event.amount.toLocaleString()}`
+                    : `-$${Math.abs(event.amount).toLocaleString()}`;
+                item.innerHTML = `
+                    <span>Year ${year}: ${amountStr} — ${event.description}</span>
+                    <button class="btn btn-remove" onclick="removeEvent(${year})">Remove</button>
                 `;
+                eventList.appendChild(item);
             }
         }
-        
+
         function removeEvent(year) {
             delete lifeEvents[year];
             updateEventList();
         }
-        
+
         function runSingleSimulation(netWorth, annualSavings, returnRate, volatility, years) {
             const realReturnRate = (1 + returnRate) / (1 + INFLATION_RATE) - 1;
-            
+
             let futureValue = netWorth;
             let realFutureValue = netWorth;
             let yearlyData = [];
-            
+
             for (let year = 1; year <= years; year++) {
                 futureValue += annualSavings;
                 realFutureValue += annualSavings;
-                
+
                 if (lifeEvents[year]) {
                     futureValue += lifeEvents[year].amount;
                     realFutureValue += lifeEvents[year].amount;
                 }
-                
-                // Use random return for Monte Carlo
+
                 const yearReturn = randomNormal(returnRate, volatility);
                 const yearRealReturn = randomNormal(realReturnRate, volatility);
-                
+
                 futureValue *= (1 + yearReturn);
                 realFutureValue *= (1 + yearRealReturn);
-                
-                yearlyData.push({
-                    year,
-                    nominal: futureValue,
-                    real: realFutureValue
-                });
+
+                yearlyData.push({ year, nominal: futureValue, real: realFutureValue });
             }
-            
+
             return yearlyData;
         }
-        
+
         function calculate() {
             const netWorth = parseFloat(document.getElementById('netWorth').value);
             const annualSavings = parseFloat(document.getElementById('annualSavings').value);
@@ -281,39 +487,35 @@
             const volatility = parseFloat(document.getElementById('volatility').value);
             const years = parseInt(document.getElementById('years').value);
             const calculateBtn = document.getElementById('calculateBtn');
-            
+
             if (isNaN(netWorth) || isNaN(annualSavings) || isNaN(returnRate) || isNaN(years)) {
                 alert('Please fill in all fields with valid numbers');
                 return;
             }
-            
-            // Disable button and show progress
+
             calculateBtn.disabled = true;
             calculateBtn.textContent = 'Running 1,000 simulations...';
-            
-            // Use setTimeout to allow UI to update
+
             setTimeout(() => {
                 runMonteCarlo(netWorth, annualSavings, returnRate, volatility, years);
                 calculateBtn.disabled = false;
                 calculateBtn.textContent = 'Calculate Projection';
             }, 100);
         }
-        
+
         function runMonteCarlo(netWorth, annualSavings, returnRate, volatility, years) {
             const numSimulations = 1000;
             const allSimulations = [];
-            
-            // Run all simulations
+
             for (let i = 0; i < numSimulations; i++) {
-                const simulation = runSingleSimulation(netWorth, annualSavings, returnRate, volatility, years);
-                allSimulations.push(simulation);
+                allSimulations.push(
+                    runSingleSimulation(netWorth, annualSavings, returnRate, volatility, years)
+                );
             }
-            
-            // Calculate percentiles for each year
+
             const percentileData = [];
             for (let year = 0; year < years; year++) {
                 const yearValues = allSimulations.map(sim => sim[year].real).sort((a, b) => a - b);
-                
                 percentileData.push({
                     year: year + 1,
                     p10: yearValues[Math.floor(numSimulations * 0.10)],
@@ -325,73 +527,210 @@
                     max: yearValues[numSimulations - 1]
                 });
             }
-            
+
             displayMonteCarloResults(percentileData, netWorth, annualSavings, years);
         }
-        
+
+        let chartInstance = null;
+
+        function renderChart(percentileData) {
+            const ctx = document.getElementById('projectionChart').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const labels = percentileData.map(d => `Year ${d.year}`);
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '90th Percentile (Optimistic)',
+                            data: percentileData.map(d => d.p90),
+                            borderColor: '#52b788',
+                            borderWidth: 2,
+                            borderDash: [6, 3],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0.3
+                        },
+                        {
+                            label: '75th Percentile',
+                            data: percentileData.map(d => d.p75),
+                            borderColor: '#74c69d',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            fill: '+1',
+                            backgroundColor: 'rgba(116, 198, 157, 0.12)',
+                            tension: 0.3
+                        },
+                        {
+                            label: '50th Percentile (Median)',
+                            data: percentileData.map(d => d.p50),
+                            borderColor: '#1a3a2a',
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            fill: '+1',
+                            backgroundColor: 'rgba(45, 106, 79, 0.18)',
+                            tension: 0.3
+                        },
+                        {
+                            label: '25th Percentile',
+                            data: percentileData.map(d => d.p25),
+                            borderColor: '#74c69d',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            fill: '+1',
+                            backgroundColor: 'rgba(116, 198, 157, 0.12)',
+                            tension: 0.3
+                        },
+                        {
+                            label: '10th Percentile (Pessimistic)',
+                            data: percentileData.map(d => d.p10),
+                            borderColor: '#52b788',
+                            borderWidth: 2,
+                            borderDash: [6, 3],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'DM Sans', size: 12 },
+                                color: '#5a7a6a',
+                                padding: 16,
+                                usePointStyle: true,
+                                pointStyleWidth: 12
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: $${context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+                                }
+                            },
+                            titleFont: { family: 'DM Sans' },
+                            bodyFont: { family: 'DM Sans' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'DM Sans', size: 11 },
+                                color: '#5a7a6a',
+                                maxTicksLimit: 10
+                            }
+                        },
+                        y: {
+                            grid: { color: 'rgba(26, 58, 42, 0.06)' },
+                            ticks: {
+                                font: { family: 'DM Sans', size: 11 },
+                                color: '#5a7a6a',
+                                callback: function(value) {
+                                    if (value >= 1000000) return '$' + (value / 1000000).toFixed(1) + 'M';
+                                    if (value >= 1000) return '$' + (value / 1000).toFixed(0) + 'K';
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         function displayMonteCarloResults(percentileData, netWorth, annualSavings, years) {
             const resultsDiv = document.getElementById('results');
-            
             const finalYear = percentileData[percentileData.length - 1];
-            
+            const totalContributions = annualSavings * years;
+            const totalEvents = Object.values(lifeEvents).reduce((sum, e) => sum + e.amount, 0);
+
             let html = `
-                <div class="monte-carlo-summary">
-                    <h3>Monte Carlo Simulation Results (1,000 runs)</h3>
-                    <p style="color: #666; margin-bottom: 15px;">Shows range of possible outcomes accounting for market volatility</p>
-                    
-                    <h4>Final Year ${years} Outcomes (Real Value in Today's Dollars):</h4>
-                    <p><strong>Best Case (90th percentile):</strong> $${finalYear.p90.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
-                    <p><strong>Likely Case (50th percentile/median):</strong> $${finalYear.p50.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
-                    <p><strong>Worst Case (10th percentile):</strong> $${finalYear.p10.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
-                    
-                    <div style="margin-top: 15px;">
-                        <p><strong>Range:</strong> $${finalYear.min.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} to $${finalYear.max.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                <div class="card" style="margin-top: 30px;">
+                    <h2>Projected Outcomes</h2>
+
+                    <div class="summary-grid">
+                        <div class="summary-box">
+                            <div class="label">Pessimistic (10th)</div>
+                            <div class="value">$${(finalYear.p10 / 1000).toFixed(0)}K</div>
+                        </div>
+                        <div class="summary-box highlight">
+                            <div class="label">Median (50th)</div>
+                            <div class="value">$${finalYear.p50 >= 1000000 ? (finalYear.p50 / 1000000).toFixed(2) + 'M' : (finalYear.p50 / 1000).toFixed(0) + 'K'}</div>
+                        </div>
+                        <div class="summary-box">
+                            <div class="label">Optimistic (90th)</div>
+                            <div class="value">$${(finalYear.p90 / 1000).toFixed(0)}K</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="projectionChart"></canvas>
                     </div>
                 </div>
-                
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Year</th>
-                            <th>10th %ile<br>(Pessimistic)</th>
-                            <th>25th %ile</th>
-                            <th>50th %ile<br>(Median)</th>
-                            <th>75th %ile</th>
-                            <th>90th %ile<br>(Optimistic)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+
+                <div class="card">
+                    <h2>Year-by-Year Breakdown</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">Year</th>
+                                <th>10th %ile</th>
+                                <th>25th %ile</th>
+                                <th>Median</th>
+                                <th>75th %ile</th>
+                                <th>90th %ile</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
-            
+
             percentileData.forEach(row => {
                 html += `
                     <tr>
                         <td>${row.year}</td>
-                        <td>$${row.p10.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td>$${row.p25.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td><strong>$${row.p50.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
-                        <td>$${row.p75.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td>$${row.p90.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td>$${row.p10.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                        <td>$${row.p25.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                        <td><strong>$${row.p50.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</strong></td>
+                        <td>$${row.p75.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                        <td>$${row.p90.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
                     </tr>
                 `;
             });
-            
+
             html += `
-                    </tbody>
-                </table>
-                
-                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px;">
-                    <strong>💡 How to interpret this:</strong>
-                    <ul style="margin: 10px 0; padding-left: 20px;">
-                        <li>The <strong>median (50th percentile)</strong> is your most likely outcome</li>
-                        <li>You have a <strong>90% chance</strong> of ending up above the 10th percentile</li>
-                        <li>You have a <strong>10% chance</strong> of ending up above the 90th percentile</li>
-                        <li>The wide range shows how much uncertainty exists due to market volatility</li>
-                    </ul>
+                        </tbody>
+                    </table>
+
+                    <div class="info-box">
+                        <strong>💡 How to interpret this</strong>
+                        <ul>
+                            <li>The <strong>median</strong> is your most likely outcome</li>
+                            <li>You have a <strong>90% chance</strong> of finishing above the 10th percentile</li>
+                            <li>You have a <strong>10% chance</strong> of finishing above the 90th percentile</li>
+                            <li>The shaded band on the chart shows the most likely range of outcomes</li>
+                            <li>All values are in <strong>today's dollars</strong> (adjusted for 3.1% inflation)</li>
+                        </ul>
+                    </div>
                 </div>
             `;
-            
+
             resultsDiv.innerHTML = html;
+            renderChart(percentileData);
         }
     </script>
 </body>
