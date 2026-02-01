@@ -468,8 +468,8 @@
                     realFutureValue += lifeEvents[year].amount;
                 }
 
-                const yearReturn = randomNormal(returnRate, volatility);
-                const yearRealReturn = randomNormal(realReturnRate, volatility);
+                const yearReturn = randomNormal(returnRate + 0.5 * volatility * volatility, volatility);
+                const yearRealReturn = randomNormal(realReturnRate + 0.5 * volatility * volatility, volatility);
 
                 futureValue *= (1 + yearReturn);
                 realFutureValue *= (1 + yearRealReturn);
