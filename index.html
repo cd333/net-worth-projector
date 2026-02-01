@@ -666,7 +666,7 @@
                     <div class="summary-grid">
                         <div class="summary-box">
                             <div class="label">Pessimistic (10th)</div>
-                            <div class="value">$${(finalYear.p10 / 1000).toFixed(0)}K</div>
+                            <div class="value">$${finalYear.p10 >= 1000000 ? (finalYear.p10 / 1000000).toFixed(2) + 'M' : (finalYear.p10 / 1000).toFixed(0) + 'K'}</div>
                         </div>
                         <div class="summary-box highlight">
                             <div class="label">Median (50th)</div>
@@ -674,7 +674,7 @@
                         </div>
                         <div class="summary-box">
                             <div class="label">Optimistic (90th)</div>
-                            <div class="value">$${(finalYear.p90 / 1000).toFixed(0)}K</div>
+                            <div class="value">$${finalYear.p90 >= 1000000 ? (finalYear.p90 / 1000000).toFixed(2) + 'M' : (finalYear.p90 / 1000).toFixed(0) + 'K'}</div>
                         </div>
                     </div>
 
